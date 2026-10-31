@@ -21,6 +21,15 @@ body{background:#edf2f6;padding:12px;box-sizing:border-box}
 <h2 id="alphaHeader">BYTE NDT — TWIN FORMATION · ALPHA REV0 8512</h2><p id="alphaNotice">Démonstrateur pédagogique non étalonné · trajets géométriques illustratifs · non validé comme CIVA</p><div style="margin:8px 0"><button id="fr">Français</button><button id="en">English</button><span id="langstatus" class="legend"> FR / EN</span></div><div id="operatorHelp" class="hint"><b>Geste opérateur :</b> glisser le MWB à la souris pour X/Y ; <b>molette</b> au-dessus du palpeur pour θz (ou boutons ↶ ↷). Le cordon et les bords limitent le déplacement. Rotation manuelle continue de 0° à 355° par pas de 5°. 0° vise +Y, 180° vise −Y. Géométrie de soudure : modèle paramétrique pédagogique à valider.</div>
 <div class="wrap"><div><canvas id="plate" width="650" height="430"></canvas><div id="plateLegend" class="legend">Vue de dessus · zone grise : tôle · bande ocre : cordon de soudure · MWB bleu · ligne jaune : direction azimutale réelle du faisceau (0° = +Y).</div></div>
 <div class="panel"><div><button id="left">↶ −5°</button><button id="right">↷ +5°</button><button id="reset">Réinitialiser</button><button id="side">Autre côté du cordon</button></div>
+<div id="xyControls" style="margin:9px 0;padding:10px;border:1px solid #bacbd6;border-radius:6px;background:#fff">
+<strong id="xyTitle">Positionnement précis du MWB (X/Y)</strong>
+<div style="margin:7px 0"><label id="xyStepLabel" for="xyStep">Pas :</label> <select id="xyStep" aria-label="Pas de déplacement"><option value="1">1 mm</option><option value="5">5 mm</option></select></div>
+<div style="display:grid;grid-template-columns:repeat(3,52px);gap:5px;justify-content:center">
+<span></span><button type="button" data-move="xp" title="X +">↑ X+</button><span></span>
+<button type="button" data-move="ym" title="Y −">← Y−</button><button type="button" data-move="xm" title="X −">↓ X−</button><button type="button" data-move="yp" title="Y +">→ Y+</button>
+</div>
+<div id="xyHelp" class="hint">X : longueur de soudure (haut/bas). Y : travers du cordon (gauche/droite). Limites physiques conservées.</div>
+</div>
 <div id="state" class="data"></div><div style="margin:8px 0;padding:7px;background:#e5edf2;border-radius:4px"><label><input id="instructor" type="checkbox"> <span id="instructorLabel">Mode instructeur — révéler les 3 indications</span></label><div id="instructorHelp" class="legend">Mode élève par défaut : positions et types cachés. Mode instructeur : repères visibles sur la vue et liste des indications.</div><div id="truth" class="legend"></div></div><b id="ascanTitle">A-scan : racine, géométrie et indications (simulation pédagogique)</b>
 <div style="margin:6px 0"><label id="gainLabel">Gain affichage A-scan (non étalonné) : <input id="gain" type="range" min="1" max="8" value="3" step="0.5"> <span id="gainValue">×3</span></label></div><canvas id="ascan" width="400" height="200"></canvas><div id="echoInfo" class="legend"></div>
 <div style="margin-top:12px"><b id="sectionTitle">Coupe transversale de la soudure — profil géométrique</b>
@@ -186,7 +195,7 @@ function renderMeasurement(){
 }
 document.getElementById('sample').onclick=()=>{if(currentMeasurement){samples.push({...currentMeasurement});renderMeasurement()}};
 document.getElementById('clearSamples').onclick=()=>{samples=[];renderMeasurement()};
-function setLanguage(lang){uiLang=lang;const t=tr[lang];document.getElementById('measureTitle').innerText=t.title;document.getElementById('gateHelp').innerText=t.help;document.getElementById('gateRules').innerText=lang==='fr'?'Trois portes A/B/C : limites temporelles et seuils inférieur/supérieur en % FSH. Mesure de la porte sélectionnée.':'Three A/B/C gates: time limits and lower/upper amplitude thresholds (% FSH). Measurement uses selected gate.';document.getElementById('sample').innerText=t.sample;document.getElementById('clearSamples').innerText=t.clear;document.getElementById('langstatus').innerText=lang==='fr'?'Interface : français':'Interface: English';document.getElementById('alphaNotice').innerText=lang==='fr'?'Démonstrateur pédagogique non étalonné · trajets géométriques illustratifs · non validé comme CIVA':'Uncalibrated training demonstrator · illustrative geometric ray paths · not validated as CIVA';document.getElementById('side').innerText=lang==='fr'?'Autre côté du cordon':'Opposite weld side';document.getElementById('gainLabel').firstChild.textContent=lang==='fr'?'Gain affichage A-scan (non étalonné) : ':'A-scan display gain (uncalibrated): ';localizeStatic();initGates();drawSection();draw()}
+function setLanguage(lang){uiLang=lang;const t=tr[lang];document.getElementById('measureTitle').innerText=t.title;document.getElementById('gateHelp').innerText=t.help;document.getElementById('gateRules').innerText=lang==='fr'?'Trois portes A/B/C : limites temporelles et seuils inférieur/supérieur en % FSH. Mesure de la porte sélectionnée.':'Three A/B/C gates: time limits and lower/upper amplitude thresholds (% FSH). Measurement uses selected gate.';document.getElementById('sample').innerText=t.sample;document.getElementById('clearSamples').innerText=t.clear;document.getElementById('langstatus').innerText=lang==='fr'?'Interface : français':'Interface: English';document.getElementById('alphaNotice').innerText=lang==='fr'?'Démonstrateur pédagogique non étalonné · trajets géométriques illustratifs · non validé comme CIVA':'Uncalibrated training demonstrator · illustrative geometric ray paths · not validated as CIVA';document.getElementById('side').innerText=lang==='fr'?'Autre côté du cordon':'Opposite weld side';document.getElementById('xyTitle').innerText=lang==='fr'?'Positionnement précis du MWB (X/Y)':'Precise MWB positioning (X/Y)';document.getElementById('xyStepLabel').innerText=lang==='fr'?'Pas :':'Step:';document.getElementById('xyHelp').innerText=lang==='fr'?'X : longueur de soudure (haut/bas). Y : travers du cordon (gauche/droite). Limites physiques conservées.':'X: along weld (up/down). Y: across weld (left/right). Physical clearance maintained.';document.getElementById('gainLabel').firstChild.textContent=lang==='fr'?'Gain affichage A-scan (non étalonné) : ':'A-scan display gain (uncalibrated): ';localizeStatic();initGates();drawSection();draw()}
 document.getElementById('fr').onclick=()=>setLanguage('fr');document.getElementById('en').onclick=()=>setLanguage('en');
 function pointer(e){let r=p.getBoundingClientRect();return {x:(e.clientX-r.left)*650/r.width,y:(e.clientY-r.top)*430/r.height}}
 p.addEventListener('pointerdown',e=>{let pt=pointer(e);if(Math.hypot(pt.x-x,pt.y-y)<40){drag=true;offX=pt.x-x;offY=pt.y-y;p.setPointerCapture(e.pointerId)}});
@@ -198,6 +207,19 @@ document.getElementById('right').onclick=()=>{theta=(theta+5)%360;draw()};
 document.getElementById('reset').onclick=()=>{x=180;y=215;theta=0;draw()};
 document.getElementById('side').onclick=()=>{const gap=CAP_HALF+PROBE_RADIUS; x=x<weldX?weldX+gap+12:weldX-gap-12;theta=(theta+180)%360;draw()};
 document.getElementById('gain').addEventListener('input',draw);
+// REV1: precise X/Y positioning, 1 mm = 2 canvas pixels. Preserve weld-cap exclusion.
+document.getElementById('xyControls').addEventListener('click',e=>{
+ const button=e.target.closest('button[data-move]');if(!button)return;
+ const pixels=2*Number(document.getElementById('xyStep').value);
+ switch(button.dataset.move){
+  case 'xp':y=clamp(y-pixels,45,382);break;
+  case 'xm':y=clamp(y+pixels,45,382);break;
+  case 'yp':x=safeProbeX(x+pixels);break;
+  case 'ym':x=safeProbeX(x-pixels);break;
+ }
+ draw();
+});
+
 
 function drawHeat(){
 const canvas=document.getElementById('heat');if(!canvas)return;
